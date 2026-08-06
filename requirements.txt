@@ -1,0 +1,6 @@
+feedparser==6.0.11
+requests==2.32.3
+# Reads the OS certificate store instead of certifi's bundle. Required on any
+# machine behind TLS-inspecting antivirus or a corporate proxy, where the
+# interceptor's root CA is trusted by the OS but unknown to certifi.
+truststore==0.10.1

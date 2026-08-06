@@ -1,0 +1,21 @@
+[build]
+  # Nothing to compile -- the site is plain HTML/CSS/JS.
+  # The publish step copies data/ next to the static files so the
+  # dashboard can fetch data/<date>.json relative to itself.
+  command = "mkdir -p public/data && cp data/*.json public/data/ 2>/dev/null || echo 'no data yet'"
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    # digests are rebuilt daily; let the browser revalidate
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

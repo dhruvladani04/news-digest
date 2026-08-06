@@ -1,0 +1,75 @@
+name: Validate feeds
+
+# Feed URLs behave differently depending on where you fetch from. SSL handshake
+# failures and 403s are frequently caused by the local network -- corporate
+# proxies, ISP TLS inspection, consumer antivirus -- rather than by the
+# publisher. This runs the identical check from a GitHub runner, which is the
+# network the daily job actually uses, so you prune based on the right verdict.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 0"     # Sundays, 08:30 IST -- catches feeds that rot
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Check every feed
+        run: python scripts/validate_feeds.py --verbose --json feed-health.json
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ ! -f feed-health.json ]; then exit 0; fi
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, collections
+          rs = json.load(open("feed-health.json"))
+          c = collections.Counter(r["status"] for r in rs)
+          print(f"## Feed health: {c['OK']} ok / {c['EMPTY']} empty / {c['DEAD']} dead\n")
+
+          bad = [r for r in rs if r["status"] != "OK"]
+          if bad:
+              print("### Failing\n")
+              print("| Feed | Sector | Problem | URL |")
+              print("|---|---|---|---|")
+              for r in sorted(bad, key=lambda r: r["sector"]):
+                  print(f"| {r['name']} | {r['sector']} | `{r['detail']}` | {r['url']} |")
+              print()
+
+          resc = [r for r in rs if r["status"] == "OK" and r["strategy"] not in (None, "browser")]
+          if resc:
+              print("### Rescued by fallback\n")
+              print("| Feed | Strategy |")
+              print("|---|---|")
+              for r in resc:
+                  print(f"| {r['name']} | {r['strategy']} |")
+              print()
+
+          print("### Per sector\n")
+          by = collections.defaultdict(list)
+          for r in rs: by[r["sector"]].append(r)
+          print("| Sector | Working |")
+          print("|---|---|")
+          for sec, items in sorted(by.items()):
+              ok = sum(1 for i in items if i["status"] == "OK")
+              flag = " ⚠️" if ok < 4 else ""
+              print(f"| {sec} | {ok}/{len(items)}{flag} |")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: feed-health
+          path: feed-health.json

@@ -1,0 +1,8 @@
+__pycache__/
+.python-version
+*.pyc
+.venv/
+venv/
+.DS_Store
+feeds_dead.txt
+public/data/

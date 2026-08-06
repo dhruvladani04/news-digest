@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Digest</title>
+<meta name="description" content="A daily cross-sector news digest built from primary RSS sources.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div>
+        <h1>Daily Digest</h1>
+        <p class="brand-sub" id="brandSub">loading…</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="prevDay" class="icon-btn" title="Previous day" aria-label="Previous day">‹</button>
+      <select id="datePicker" aria-label="Choose a date"></select>
+      <button id="nextDay" class="icon-btn" title="Next day" aria-label="Next day">›</button>
+      <button id="themeToggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </div>
+  </div>
+
+  <nav class="sectornav" id="sectorNav"></nav>
+</header>
+
+<main id="main">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Loading today's digest…</p>
+  </div>
+</main>
+
+<footer class="footer">
+  <p id="footMeta"></p>
+  <p class="foot-note">
+    Headlines and summaries are the publishers' own, pulled from their public RSS feeds.
+    Follow any link to read the full article at the source.
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
